@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stardance WebOS</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Desktop -->
+  <div id="desktop">
+    <div class="icons">
+      <button class="icon" data-app="notes">
+        <span class="icon-img">📝</span>
+        <span class="icon-label">Notes</span>
+      </button>
+      <button class="icon" data-app="calc">
+        <span class="icon-img">🧮</span>
+        <span class="icon-label">Calculator</span>
+      </button>
+      <button class="icon" data-app="clock">
+        <span class="icon-img">🕒</span>
+        <span class="icon-label">Clock</span>
+      </button>
+      <button class="icon" data-app="about">
+        <span class="icon-img">⭐</span>
+        <span class="icon-label">About</span>
+      </button>
+    </div>
+
+    <!-- Windows get added here -->
+    <div id="windows"></div>
+  </div>
+
+  <!-- Taskbar -->
+  <footer id="taskbar">
+    <button id="start-btn">★ Start</button>
+    <div id="task-list"></div>
+    <div id="tray">
+      <span id="tray-clock">--:--</span>
+    </div>
+  </footer>
+
+  <!-- Start menu -->
+  <div id="start-menu" class="hidden">
+    <button data-app="notes">📝 Notes</button>
+    <button data-app="calc">🧮 Calculator</button>
+    <button data-app="clock">🕒 Clock</button>
+    <button data-app="about">⭐ About</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
