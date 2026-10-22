@@ -92,6 +92,60 @@ const APPS = {
     },
   },
 
+  hackatime: {
+    title: "Hackatime",
+    body: () => `
+      <p>Track your WebOS time with <strong>Hackatime</strong>.
+         Paste your API key from your Hackatime settings. It's saved only in this browser.</p>
+      <input class="ht-key" type="password" placeholder="Hackatime API key" style="width:100%;margin:8px 0;padding:6px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#f1f5f9" />
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <button class="ht-save task-btn">Save key</button>
+        <button class="ht-toggle task-btn">Start tracking</button>
+      </div>
+      <div class="ht-status notes-status">Not tracking</div>
+    `,
+    init(win) {
+      const keyInput = win.querySelector(".ht-key");
+      const toggle = win.querySelector(".ht-toggle");
+      const status = win.querySelector(".ht-status");
+
+      try {
+        keyInput.value = localStorage.getItem("webos-hackatime-key") || "";
+      } catch (e) {
+        status.textContent = "Storage unavailable";
+      }
+
+      win.querySelector(".ht-save").addEventListener("click", () => {
+        try {
+          localStorage.setItem("webos-hackatime-key", keyInput.value.trim());
+          status.textContent = "Key saved";
+        } catch (e) {
+          status.textContent = "Could not save key";
+        }
+      });
+
+      toggle.addEventListener("click", () => {
+        if (hackatimeTimer) {
+          stopHackatime();
+          toggle.textContent = "Start tracking";
+          status.textContent = "Stopped";
+        } else {
+          const key = keyInput.value.trim();
+          if (!key) {
+            status.textContent = "Paste your API key first";
+            return;
+          }
+          startHackatime(key);
+          toggle.textContent = "Stop tracking";
+          status.textContent = "Tracking WebOS time";
+        }
+      });
+    },
+    close() {
+      // Keep tracking running in the background if it was started
+    },
+  },
+
   about: {
     title: "About",
     body: () => `
@@ -105,6 +159,42 @@ const APPS = {
     `,
   },
 };
+
+// ---------- Hackatime time tracking ----------
+// Sends a heartbeat every 2 minutes while tracking is on.
+// The API key only lives in this browser (localStorage) and is never stored in the code.
+let hackatimeTimer = null;
+
+function sendHeartbeat(key) {
+  const body = [{
+    type: "file",
+    time: Math.floor(Date.now() / 1000),
+    entity: "webos/index.html",
+    language: "HTML",
+    project: "stardance-webos-1",
+  }];
+  fetch("https://hackatime.hackclub.com/api/hackatime/v1/users/current/heartbeats", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + key,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  }).catch(() => {
+    // Ignore network errors so the OS keeps running
+  });
+}
+
+function startHackatime(key) {
+  stopHackatime();
+  sendHeartbeat(key);
+  hackatimeTimer = setInterval(() => sendHeartbeat(key), 2 * 60 * 1000);
+}
+
+function stopHackatime() {
+  clearInterval(hackatimeTimer);
+  hackatimeTimer = null;
+}
 
 // ---------- State ----------
 let zCounter = 10;
